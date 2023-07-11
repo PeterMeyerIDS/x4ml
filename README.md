@@ -1,6 +1,6 @@
 # x4ml: A Teaching Tool for XML-based lexicographical data modeling and (HTML) presentation
 
-**x4ml** is "**X**ML **4 M**asterful **L**exicographers". This is the first public release of x4ml, in honor of Gerd Hentschel on the occasion of his 70th birthday. This release accompanies the Festschrift publication
+**x4ml** is "**X**ML **4 M**asterful **L**exicographers". This is the first public release, 0.9.**70**, of x4ml, in honor of Professor **Gerd Hentschel** on the occasion of his 70th birthday. This release accompanies the Festschrift publication
 > Peter Meyer (2023): 'Einsatz von EDV und Mikrocomputer in Lehrveranstaltungen zur digitalen Lexikografie'. In: Hauke Bartels, Thomas Menzel, Jan Patrick Zeller (eds.): *Einheit(en) in der Vielfalt von Slavistik und Osteuropakunde. Prvdentia Regnorvm Fvndamentvm.* Lausanne-Berlin-Bruxelles-Chennai-New York-Oxford: Peter Lang.
 
 ## Welcome to x4ml ##
