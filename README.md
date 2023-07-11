@@ -61,3 +61,65 @@ Your work with x4ml is organized in workspaces.
 - When there is an open file in a pane, you may click on the “action” button in that same pane to perform certain operations on the file. We will learn about the possible actions for different types of files as we go along.
 - Whenever you change something in a file opened through x4ml, your changes are saved immediately; all panes are updated immediately.
 - Watch out for blocked popups! Some workspace operations open a new tab or window in the browser. Some browsers (notably Chrome) block this, but issue a warning. You should then allow “popups” for x4ml and retry. I have not been able to solve this problem satisfactorily until now. x4ml checks for suppressed popups, however, and issues warnings where necessary.
+
+## Editing XML files (left pane, file name ends in ‘.xml’)
+- If you type a start tag, the editor puts in the end tag as soon as you typed the closing bracket >.
+- If you hit ENTER to start a new line, the indentation of the previous line is preserved. This is not always what you want, but most of the time it is convenient.
+- XML files are easier to read when indentation is used to clearly show the structure. The action format XML can be used to automatically create a well-readable indentation. It’s not always perfect; if you do not like the outcome, just use the undo action (or the undo shortcut Ctrl/Command-z).
+
+## Editing DTD files (right pane, file name ends in ‘.dtd’)
+- Per default, x4ml uses the DTD file to validate (=check the structure of) the XML file currently open in the left pane and shows you the results in the lower half. If you want to validate all your XML files in your workspace at once, just use the action *show output for all XML files*. Note that this is not a permanent setting – as soon as you change something in either the DTD or the current XML file, you again get the validation results for the current XML only.
+- Other than that, nothing special, just syntax highlighting.
+
+## RelaxNG files, compact notation (right pane, file name ends in ‘.rnc’)
+- Per default, x4ml uses the RelaxNG file to validate (=check the structure of) the XML file currently open in the left pane and shows you the results in the lower half. If you want to validate all your XML files in your workspace at once, just use the action *show output for all XML files*. Note that this is not a permanent setting – as soon as you change something in either the RelaxNG or the current XML file, you again get the validation results for the current XML only.
+- Other than that, nothing special – alas, no syntax highlighting in the RelaxNG code.
+- Inofficially, also the XML notation of RelaxNG is supported (file name ends in ‘.rng’).
+
+## XPath/XQuery files (right pane, file name ends in ‘.xpath’)
+- You can only type one XPath expression per file (but this might consist of several expressions separated by commas, which returns a sequence of results). The editor shows you the result of applying this expression to the XML on the left side. Your XPath expression is a question about the XML on the left hand side, and you’re shown the answer.
+- If you like, you can use a comment, which looks (: like this :) in XPath, as a “storage” for, well, comments and other stuff, e.g. any number of XPath expressions you tried or want to try. You may put comments before or after your XPath expression.
+- Per default, x4ml applies the XPath to the XML file currently open in the left pane and shows you the results in the lower half. If you want to do this for all of your XML files in your workspace at once such that the XPath expression is applied to each XML file in turn, just use the action *show output for all XML files*. Note that this is not a permanent setting – as soon as you change something in either the XPath file or the current XML file, you get the results for the current XML only again.
+- You can apply your XPath expression to all your XML documents, not individually but taken together, using the action *evaluate XPath query on all XML docs* ("database mode"). Technically, this means that the query / returns a sequence such that for each XML document in the workspace, all children of the root node form one item in the sequence.
+- In your XPath files, you may actually use not only XPath expressions, but also any expressions in XQuery (version 3.1), of which the XPath language is a subset.
+
+## HTML files (right pane, file name ends in ‘.html’)
+- The HTML editor has automatic end tag completion, like the XML editor; and it gives visual feedback if your HTML is not well-formed, i.e. if you made a syntax mistake.
+- The output in the lower half of the right pane is the HTML as rendered in a browser.
+- You can include XPath expressions into your HTML code. The expressions must be enclosed in double curly brackets (‘moustaches’), like this: {{/entry/headword}}. The trick is that x4ml executes that expression with respect to the XML file on the left and puts the result where the moustaches are. This way, your HTML document becomes a **template** that is filled with content from your XML file. (This is similar to an important technology called XSLT, but hopefully easier.)
+- You can use the action *insert code to iterate HTML elements* to construct multiple HTML elements (or sequences of elements) from multiple XML elements. For example, you may have multiple <definition> elements in your XML, corresponding to different word senses. If you want, in your HTML, a `<p>` element (a paragraph) for each XML `<definition>` element, you just invoke the above action exactly at the place in your HTML where the `<p>`’s should go and something like the following is inserted:
+```
+    <!-- repeat for all $x in /your/xpath -->
+           (insert HTML instead of this text; don't forget to use different variables $x, $y, ... if you nest repeated sections; don't forget to always use the matching variable name in the "end repeat" part)
+    <!-- end repeat for all $x -->
+```
+Now you change this to something like the following, again using ‘moustaches’ to include XPath expressions – do not forget the `$` that is mandatory for the variable stuff:
+```
+	  <!-- repeat for all $x in //definition  -->
+           <p>{{ $x/text() }}</p>
+    <!-- end repeat for all $x -->
+```
+Your HTML output will now indeed contain, for each `<definition>` in the XML, a `<p>` element that contains the text of the `<definition>` element: For each result obtained from applying the XPath expression `//definition`, i.e. for each `<definition>` element in the XML document, the HTML stuff `<p>{{ $x/text() }}</p>` is inserted into the final HML document, where the variable `$x` stands for the currently treated XPath result, i.e., the current `<definition>` element. This will produce
+```
+   <p>some definition</p><p>other definition</p>
+```
+if your xml contains the elements `<definition>some definition</definition>` and `<definition>other definition</definition>`.
+You may nest multiple “repeat-sections” inside each other. You must use different variables  for these nested sections.
+- There’s a very similar action, insert code to iterate HTML elements, with separator. It repeats HTML stuff, but additionally, between the repeated stuff, some separator stuff (which could even be something like `<br>`) is inserted:
+```
+	  <!-- repeat for all $x in //definition separated by '; '  -->
+           <i>{{ $x/text() }}</i>
+    <!-- end repeat for all $x -->
+```
+This will produce
+```
+    <i>some definition</i>; <i>other definition</i>
+```
+if your xml contains the elements `<definition>some definition</definition>` and `<definition>other definition</definition>`.
+- Per default, x4ml uses your HTML file with the XML file currently open in the left pane and shows you the results of that in the lower half. If you want to do this for all of your XML files in your workspace at once such that the HTML template is applied to each XML file separately, just use the action *show output for all XML files*. Note that this is not a permanent setting – as soon as you change something in either the XPath file or the current HTML file, you get the results for the current HTML only again. – This action is probably less interesting than the dictionary action discussed below.
+- HTML is the language of browsers. If you want to see your HTML (with the moustaches and repeating stuff properly processed for the currently opened XML!) in a separate browser tab/window, you invoke the action *render HTML in browser*. A separate tab or window will open in your browser. You can leave this separate tab/window open; if you later change your HTML, the rendered browser content will update automagically. For different XML files different browser tabs are opened.
+- You can check whether your HTML (with the moustaches and repeating stuff properly processed for the currently opened XML!) is valid, using an external validation service, by invoking the action *validate HTML*. This action requires an Internet connection.
+- You can try to make your HTML prettier, with convenient indentations, through the action *format HTML*. This is a fascinating function, because it even works when your HTML is not well-formed, but it may change the content and the structure of your file considerably, so do check the result and be prepared to undo the formatting!
+- You can use an HTML file with moustaches etc. to build your own mini-dictionary, where the HTML is applied to all the XML files in your workspace. Just invoke the *show as dictionary* action. In order to get a custom heading of your online dictionary, try the *set name of dictionary* action. x4ml memorizes the dictionary name for your workspace. Per default, the headword list on the left of your dictionary is filled with the names of your XML files (excluding the .xml suffix part). You can tell x4ml how to find the headword in your XMLs with the action *set XPath for dictionary headwords*. 
+- If you want to include external files, e.g. multimedia stuff, into your HTML, that is possible. If you have an image called *funny.jpg* and you want to include it, create a folder named resources (no other name allowed!) directly inside your workspace folder and put the image there. You can do this using the workspace manager (which automatically creates the resources folder) – or manually using your computer’s file explorer if you are using x4ml in Desktop mode. Now you can use, for example, `<img src="resources/funny.jpg">` in your HTML file to include the image there.
+
