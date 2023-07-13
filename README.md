@@ -1,7 +1,8 @@
 # x4ml: A Teaching Tool for XML-based lexicographical data modeling and (HTML) presentation
 
-**x4ml** is "**X**ML **4 M**asterful **L**exicographers". This is the first public release, 0.9.**70**, of x4ml, in honor of Professor **Gerd Hentschel** on the occasion of his 70th birthday. This release accompanies the Festschrift publication
+**x4ml** is "**X**ML **4 M**asterful **L**exicographers". This is the first public release, 0.9.**70**, of x4ml, in honor of Professor **Gerd Hentschel** on the occasion of his 70th birthday on July 15, 2023. This release accompanies the Festschrift publication
 > Peter Meyer (2023): 'Einsatz von EDV und Mikrocomputer in Lehrveranstaltungen zur digitalen Lexikografie'. In: Hauke Bartels, Thomas Menzel, Jan Patrick Zeller (eds.): *Einheit(en) in der Vielfalt von Slavistik und Osteuropakunde. Prvdentia Regnorvm Fvndamentvm.* Lausanne-Berlin-Bruxelles-Chennai-New York-Oxford: Peter Lang.
+The application has been used for teaching in two courses of the [European Master of Lexicography](https://www.emlex.phil.fau.eu/) program. It was presented in a [talk](https://elex.link/elex2023/wp-content/uploads/17_30-Teaching-Digital-Lexicography-from-Scratch_-an-Open-Source-Tool-for-XML-and-HTML.pdf) at the [eLex 2023](https://elex.link/elex2023/) conference.
 
 ## Welcome to x4ml ##
 x4ml is a didactic software tool aimed at IT novices who want to learn about XML/HTML-related technologies. It has been designed with aspiring lexicographers in mind, but may be useful for other purposes, too. With x4ml, you can
