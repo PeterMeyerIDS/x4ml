@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link href="/assets/materialicons.css" rel="stylesheet">
+	<link href="/assets/quasar.prod.css" rel="stylesheet">
+</head>
+
+<body>
+	<div id="q-app">
+
+		<q-layout view="hHh lpR fFf">
+
+			<q-page-container>
+				<q-page padding>
+					<h3>Workspace Management
+						<span v-if="username!='__DESKTOP__'">for user <em>{{username}}</em></span>
+					</h3>
+					<p>
+						A <em>workspace</em> is just a folder that contains
+						XML, XPath, DTD, HTML, ... files that belong to one of your project of yours, e.g. for a certain
+						dictionary.
+						<br>
+						A workspace may contain a <em>resources</em> folder for files that you want to use in your HTML,
+						e.g. image files.
+						<br>
+						To correctly reference a resource file such as <strong>yourpicture.jpg</strong> in your HTML
+						code, do it like this: <strong>&lt;img src="<span
+								class="text-red">resources/</span>yourpicture.jpg"&gt;</strong>.
+					</p>
+
+
+					<div v-for="workspace in Object.keys(userfiles)" class="q-ma-sm q-pa-md row shadow-2">
+						<div class="col">
+							<h4>
+								Workspace <em>{{workspace}}</em>
+								<q-btn round flat size="md" color="deep-orange" icon="folder_delete"
+									@click="deleteWFile(null, workspace, true)"></q-btn>
+							</h4>
+							<div>
+								<p><b>Files in the workspace:</b></p>
+								<ul v-if="userfiles[workspace].files.length">
+									<li v-for="file in userfiles[workspace].files"
+										@click="setPreviewData(workspace, file, false)"
+										:class="{'text-blue' : (workspace === previewForWorkspace && file === previewForFile && !previewForResource)}">
+										{{file}}
+										<q-btn round flat size="sm" color="deep-orange" icon="delete"
+											@click="deleteWFile(file, workspace, false)"></q-btn>
+									</li>
+								</ul>
+								<p v-else><em>&nbsp;&nbsp;&nbsp;&nbsp;There are no files in this folder.</em></p>
+							</div>
+							<div>
+								<p><b>Files in the <em>resources</em> folder of the
+										workspace:&nbsp;&nbsp;&nbsp;&nbsp;</b>
+									<q-btn round size="sm" color="green" icon="add"
+										@click="uploaderForWorkspace = (uploaderForWorkspace === workspace ? '' : workspace)"></q-btn>
+								</p>
+								<ul v-if="userfiles[workspace].resfiles.length">
+									<li v-for="file in userfiles[workspace].resfiles"
+										@click="setPreviewData(workspace, file, true)"
+										:class="{'text-blue' : (workspace === previewForWorkspace && file === previewForFile && previewForResource)}"
+									>
+										{{file}}
+										<q-btn round flat size="sm" color="deep-orange" icon="delete"
+											@click="deleteWFile(file, workspace, true)"></q-btn>
+									</li>
+								</ul>
+								<p v-else><em>&nbsp;&nbsp;&nbsp;&nbsp;There are no files in this folder.</em></p>
+								<div style="margin-left:50px;" v-show="uploaderForWorkspace === workspace">
+									<q-uploader :ref="'upload' + workspace"
+										:url="'/uploadresources/' + encodeURIComponent(workspace)" with-credentials
+										field-name="files" label="Upload files(s) to the resources folder" multiple
+										color="white" text-color="black" bordered @uploaded="getUserfiles()"
+										accept=".html, .css, .js, .woff2, .jpg, .png, .tif, .tiff, .mp3, .mp4"></q-uploader>
+								</div>
+							</div>
+
+						</div>
+						<div class="col q-ma-md">
+							<div v-if="previewForWorkspace === workspace">
+								<q-card style="width: 100%;">
+
+									<video v-if="previewFileSuffix === 'mp4'" style="width: 100%;" controls>
+										<source :src="getResourceFileURL()"
+											type="video/mp4">
+										Your browser does not support the video tag.
+									</video>
+									<audio v-if="previewFileSuffix === 'mp3'" style="width: 100%;" controls>
+										<source :src="getResourceFileURL()"
+											type="audio/mpeg">
+										Your browser does not support the audio tag.
+									</audio>
+									<q-img v-if="['jpg', 'png', 'tif', 'tiff'].includes(previewFileSuffix)"
+										:src="getResourceFileURL()"></q-img>
+									
+									<div v-if="['html', 'css', 'js', 'xml', 'rnc', 'rng', 'dtd', 'xpath'].includes(previewFileSuffix)">
+										<iframe :src="getFileTextContentURL()" width="100%" height="400" style="border:none;">
+										</iframe>
+									</div>
+									<q-card-section class="bg-grey-4">
+										<div class="text-h6">{{previewForFile}}</div>
+									</q-card-section>
+
+							</div>
+
+						</div>
+					</div>
+				</q-page>
+			</q-page-container>
+		</q-layout>
+
+
+	</div>
+
+
+
+	<script src="/assets/vue.global.prod.js"></script>
+    <script src="/assets/quasar.umd.prod.js"></script>
+      
+	<script>
+		
+		let vue;
+		const app = Vue.createApp({
+			data() {
+				return {
+					username: '',
+					sessionUuid: '',
+					userfiles: {}, //  {workdir1: {files: [...], resfiles: [...]}, workdir2: ...}
+					uploaderForWorkspace: '',
+					previewForWorkspace: '',
+					previewForFile: '',
+					previewForResource: false
+				}
+			},
+			computed: {
+				previewFileSuffix() {
+					let pos = this.previewForFile.lastIndexOf('.');
+					return this.previewForFile.substring(pos + 1);
+				}
+			},
+			methods: {
+				getUserfiles() {
+					fetch('/userfiles', {
+						headers: { 'Content-Type': 'application/json' }
+					})
+						.then(x => x.json())
+						.then(y => this.userfiles = y);
+				},
+				deleteWFile(file, workspace, isResources) {
+
+					let toDelete = (file === null ?
+						'the entire workspace "' + workspace + '" with all its files' :
+						'the file "' + file + '"'
+					);
+
+					Quasar.Dialog.create({
+						title: 'Confirm deletion',
+						message: 'Are you sure you want to delete ' + toDelete + '? This operation cannot be undone!',
+						cancel: true,
+						persistent: true
+					}).onOk(() => {
+						fetch('/deleteFile', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({
+								workspace: workspace,
+								file: file,
+								isResource: isResources
+							})
+						})
+							.then(x => x.text())
+							.then(data => this.getUserfiles())
+					}).onCancel(() => {
+						// console.log('>>>> Cancel')
+					})
+
+
+				},
+				setPreviewData(workspace, file, isResource) {
+					this.previewForWorkspace='';
+					// why nextTick? because <video> is not responsive, so must be rendered again when video changes
+					this.$nextTick(function(){
+						this.previewForWorkspace=workspace;
+						this.previewForFile=file;
+						this.previewForResource=isResource;
+					});
+					
+				},
+				getFileTextContentURL() {
+					return '/workdirfile/' + encodeURIComponent(this.previewForWorkspace) + '/' + encodeURIComponent(this.previewForFile) + (this.previewForResource ? '?resource=true' : '');
+				},
+				getResourceFileURL() {
+					return '/entry/' + encodeURIComponent(this.previewForWorkspace) + '/resources/' + encodeURIComponent(this.previewForFile);
+				}
+			},
+			mounted() {
+				let params = (new URL(document.location)).searchParams;
+				this.username = params.get("username");
+				this.getUserfiles();
+				vue = this;
+			}
+		})
+
+		app.use(Quasar)
+		app.mount('#q-app')
+	</script>
+</body>
+
+</html>

@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8"/>
+      <link href="/assets/materialicons.css" rel="stylesheet">
+      <link href="/assets/quasar.prod.css" rel="stylesheet">
+      <link rel="stylesheet" href="/assets/codemirror.css">
+      <link rel="stylesheet" href="/assets/lint.css">
+      <link rel="stylesheet" href="/assets/show-hint.css">
+      <link rel="stylesheet" href="/assets/dialog.css">
+      <link rel="stylesheet" href="/assets/matchesonscrollbar.css">
+      <script src="/assets/codemirror.js"></script>
+      <script src="/assets/xml.js"></script>
+      <script src="/assets/javascript.js"></script>
+      <script src="/assets/css.js"></script>
+      <script src="/assets/htmlmixed.js"></script>
+      <script src="/assets/lint.js"></script>
+      <script src="/assets/htmlhint.min.js"></script>
+      <script src="/assets/html-lint.js"></script>
+      <script src="/assets/dtd.js"></script>
+      <script src="/assets/xml-fold.js"></script>
+      <script src="/assets/closetag.js"></script>
+      <script src="/assets/matchtags.js"></script>
+      <script src="/assets/xquery.js"></script>
+      <script src="/assets/show-hint.js"></script>
+      <script src="/assets/xml-hint.js"></script>
+      <script src="/assets/html-hint.js"></script>
+      <script src="/assets/dialog.js"></script>
+      <script src="/assets/searchcursor.js"></script>
+      <script src="/assets/search.js"></script>
+      <script src="/assets/annotatescrollbar.js"></script>
+      <script src="/assets/matchesonscrollbar.js"></script>
+      <script src="/assets/jump-to-line.js"></script>
+      <style>
+      		.monoold {
+      			font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+      		}
+      		.mono {
+      			font-family: monospace;
+      		}
+      </style>
+   </head>
+   <body>
+      <div id="q-app">
+         <q-layout view="hHh lpR fFf">
+            <q-header elevated
+               class="bg-blue-grey-12 text-white">
+               <q-toolbar glossy>
+                  <q-avatar size="45px" font-size="20px" color="info" text-color="white">
+                     x<span style="color:green">4</span>ml
+                  </q-avatar>
+                  <q-toolbar-title>
+                     <span style="font-size:14px;">{{username == '__DESKTOP__' ? 'desktop mode' : username}} ({{projectdir}})</span>	
+                  </q-toolbar-title>
+                  <div class="q-pa-md">
+    <q-btn-dropdown stretch flat no-caps :label="'current workspace: ' + workdir" @click="showWorkdirs">
+      <q-list>
+        <q-item v-close-popup >
+          <q-item-section>
+            <q-item-label><i><b>go to a workspace:</b></i></q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup @click="workdirtab=window.open('', 'workdir_'+wdir);openWorkdir(wdir);" v-for="wdir in workdirs">
+          <q-item-section>
+            <q-item-label>&nbsp;&nbsp;&nbsp;&nbsp;{{wdir}}</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup @click="wsname=promptWorkdirName(); if(wsname){workdirtab=window.open('', 'workdir_x4ml@new@ψ');addWorkdir(wsname);}">
+          <q-item-section>
+            <q-item-label><b>create and open new workspace</b></q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup @click="workdirsmgmttab=window.open('', 'workdirsmgmt');manageWorkdirs();">
+          <q-item-section>
+            <q-item-label><b>manage workspaces...</b></q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-btn-dropdown>
+  </div>
+               </q-toolbar>
+            </q-header>
+            <q-page-container>
+               <q-page padding style="height:1px;"> <!-- https://www.456bereastreet.com/archive/201306/height_in_percent_when_parent_has_min-height_and_no_height/ -->
+                  <q-splitter
+                     v-model="mainSplitterModel"
+                     style="height:100%;"
+                     separator-style="width:10px;margin:5px;"
+                     separator-class="bg-blue-1"
+                     >
+                     <template v-slot:before>
+                        <q-splitter
+                           v-model="xmlSplitterModel"
+                           horizontal
+                           style="height: 100%"
+                           >
+                           <template v-slot:before>
+                              <div class="column" style="height:100%">
+                                 <p class="col-auto row">
+                                    <q-select :disable="throttleWait" 
+                                       class="col-8"
+                                       v-model="xmlFile" 
+                                       :options="getfileoptions(['xml'])"
+                                       options-html 
+                                       label="select or create an XML file here" 
+                                       @update:model-value="update('fetch xml')"
+                                       filled
+                                       dense
+                                       >
+                                    </q-select>
+                                    <q-btn-dropdown 
+                                    	:disable="throttleWait || xmlEditorDisabled()"
+                                    	class="col-3 offset-1 ellipsis"
+                                    	dense
+                                    	color="grey-4"
+                                    	text-color="black"
+                                    	no-caps
+                                    	label="actions"
+                                    	dropdown-icon="settings"
+                                    	>
+                                       <q-list>
+                                          <q-item clickable v-close-popup @click="xmlEditor.execCommand('undo')">
+                                             <q-item-section>
+                                                <q-item-label>undo</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item clickable v-close-popup @click="xmlEditor.execCommand('redo')">
+                                             <q-item-section>
+                                                <q-item-label>redo</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            clickable v-close-popup @click="update('prettifyxml')">
+                                             <q-item-section>
+                                                <q-item-label>format XML</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          
+                                       </q-list>
+                                    </q-btn-dropdown>
+                                 </p>
+                                 <div class="col">
+                                    <div style="height:100%">
+                                       <textarea id="xmlfilecontent">Please select or create an XML file above to start.</textarea>
+                                    </div>
+                                 </div>
+                           </template>
+                           <template v-slot:separator>
+                           		<q-avatar color="blue-4" text-color="black" size="20px" icon="drag_handle" />
+                           </template>
+                           <template v-slot:after>
+                           <div style="height:100%" class="q-pa-md">
+                           <q-card flat style="width:100%;height:90%;">
+                          		<q-card-section class="text-grey-5">MESSAGES</q-card-section>
+                          		<q-separator inset></q-separator>
+                           		<q-card-section  class="mono" v-html="escapeMessageChars(xmlMsg)">
+                           		</q-card-section>
+                           </q-card>
+                           </div>
+                           </template>
+                        </q-splitter>
+                     </template>
+                     <template v-slot:separator>
+                           <q-avatar color="blue-4" text-color="black" size="30px" icon="more_vert" />
+                     </template>
+                     <template v-slot:after>
+                        <q-splitter
+                           v-model="otherSplitterModel"
+                           horizontal
+                           style="height: 100%"
+                           >
+                           <template v-slot:before>
+                              <div class="column" style="height:100%">
+                                 <p class="col-auto row">
+                                    <q-select 
+                                       :disable="throttleWait" 
+                                       class="col-8"
+                                       v-model="otherFile" 
+                                       :options="getfileoptions(['dtd', 'xpath', 'html', 'rng', 'rnc'])"
+                                       options-html 
+                                       label="select or create a DTD, RelaxNG, XPath, or HTML file here" 
+                                       @update:model-value="update('fetch other')"
+                                       filled
+                                       dense
+                                       >
+                                    </q-select>
+                                    <q-btn-dropdown 
+                                    	:disable="throttleWait || otherEditorDisabled()"
+                                    	class="col-3 offset-1 ellipsis"
+                                    	dense
+                                    	color="grey-4"
+                                    	text-color="black"
+                                    	no-caps
+                                    	label="actions"
+                                    	dropdown-icon="settings"
+                                    	>
+                                       <q-list>
+                                          <q-item
+                                            clickable v-close-popup @click="otherEditor.execCommand('undo')">
+                                             <q-item-section>
+                                                <q-item-label>undo</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            clickable v-close-popup @click="otherEditor.execCommand('redo')">
+                                             <q-item-section>
+                                                <q-item-label>redo</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            :disable="!hasHTML" 
+                                          	clickable v-close-popup @click="update('prettifyhtml')">
+                                             <q-item-section>
+                                                <q-item-label>format HTML (WARNING: might change the content!)</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            :disable="!hasHTML || !hasXML" 
+                                          	clickable v-close-popup @click="validatetab=window.open('', 'validate');validatehtml();">
+                                             <q-item-section>
+                                                <q-item-label>validate HTML</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            :disable="!hasHTML || !hasXML" 
+                                          	clickable v-close-popup @click="entrytabs[xmlFile.value]=window.open('', 'entry_' + xmlFile.value);renderhtml();">
+                                             <q-item-section>
+                                                <q-item-label>render HTML in external browser window/tab</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            :disable="!hasHTML" 
+                                          	clickable v-close-popup @click="insertRepeatTemplate(false)">
+                                             <q-item-section>
+                                                <q-item-label>insert code to iterate HTML elements</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            :disable="!hasHTML" 
+                                          	clickable v-close-popup @click="insertRepeatTemplate(true)">
+                                             <q-item-section>
+                                                <q-item-label>insert code to iterate HTML elements, with separator</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          
+                                          <q-item
+                                            :disable="!hasHTML" 
+                                          	clickable v-close-popup @click="dicttab=window.open('', 'dict');showdict();">
+                                             <q-item-section>
+                                                <q-item-label>show as dictionary</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            clickable v-close-popup @click="setdictname()">
+                                             <q-item-section>
+                                                <q-item-label>set name of dictionary</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            clickable v-close-popup @click="setdictlemmapath()">
+                                             <q-item-section>
+                                                <q-item-label>set XPath for dictionary headwords</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            clickable v-close-popup @click="forallxml()">
+                                             <q-item-section>
+                                                <q-item-label>show output for all XML files</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                          <q-item
+                                            :disable="!hasXPath"
+                                            clickable v-close-popup @click="forallxmlXQuery()">
+                                             <q-item-section>
+                                                <q-item-label>evaluate XPath query on all XML docs ('database mode')</q-item-label>
+                                             </q-item-section>
+                                          </q-item>
+                                       </q-list>
+                                    </q-btn-dropdown>                                    
+                                 </p>
+                                 <div class="col">
+                                    <div style="height:100%">
+                                       <textarea id="otherfilecontent">Please select or create a DTD/RelaxNG, XPath/Xquery, HTML file above to start.</textarea>
+                                    </div>
+                                 </div>
+                           </template>
+                           <template v-slot:separator>
+                           		<q-avatar color="blue-4" text-color="black" size="20px" icon="drag_handle" />
+                           </template>
+                           <template v-slot:after>
+                           <div style="height:100%" class="q-pa-md">
+                           <q-card flat style="width:100%;min-height:90%;">
+                          		<q-card-section class="text-grey-5">
+                          			<div class="row">
+  										<div class="col">OUTPUT</div>
+  										<div class="col text-right">
+                          					<q-checkbox v-if="hasHTML" v-model="showHTMLSource" size="xs" label="show HTML source code" >
+                          					</q-checkbox>  										
+  										</div>
+									</div>
+                          			
+                          		</q-card-section>
+                          		<q-separator inset></q-separator>
+                           		<q-card-section v-if="!hasHTML || showHTMLSource" class="mono" v-html="escapeMessageChars(otherMsg)">
+                           		</q-card-section>
+							    <q-card-section v-else>
+									<iframe id="htmliframe" :src="getHTMLEntryURL()" width="100%" height="10000px" style="border:none;">
+									</iframe>
+								</q-card-section>
+							 
+                           </q-card>
+                           </div>                           
+                           </template>
+                        </q-splitter>
+                     </template>
+                  </q-splitter>
+               </q-page>
+            </q-page-container>
+         </q-layout>
+      </div>
+      
+      <script src="/assets/vue.global.prod.js"></script>
+      <script src="/assets/quasar.umd.prod.js"></script>
+      <script>
+         const app = Vue.createApp({
+          data() {
+             return {
+             	workdir: '',
+             	projectdir: '',
+             	username: '',
+             	sessionUuid: '',
+             	files: [],
+             	xmlFile: null,
+             	xmlSplitterModel: 50,
+             	xmlMsg: '',
+             	otherFile: null,
+             	otherMsg: '',
+             	showHTMLSource: false, // false = render HTML in output pane 
+             	otherSplitterModel: 50,
+             	mainSplitterModel: 50,
+             	throttleWait: false,
+             	workdirs: [],
+             	window: window,  // browser window
+             	wsname: '', // prompt result for new workdir name
+				// most recent browser tabs, see https://stackoverflow.com/questions/2587677/avoid-browser-popup-blockers
+				workdirtab: null,
+				workdirsmgmttab: null, 
+				dicttab: null,
+				entrytabs: {},
+				validatetab: null
+             	
+             }
+           },
+           methods: {
+           
+         checkPopupWorked(newWin) {
+         	if(!newWin || newWin.closed || typeof newWin.closed=='undefined') 
+				{ 
+    				Quasar.Dialog.create({
+        title: 'Warning – new window/tab did not open',
+        message: 'Your browser refused to open a new tab or window due to a pop-up blocking mechanism. Please configure the browser to allow pop-ups from ' + location.protocol + '//' + location.host + '  (there usually is a small icon near the address bar that tells you a pop-up has been blocked recently; click on that)'
+      }).onOk(() => {
+        // console.log('OK')
+      }).onCancel(() => {
+        // console.log('Cancel')
+      }).onDismiss(() => {
+        // console.log('I am triggered on both OK and Cancel')
+      })
+				}
+         },
+         createWorkdirUuidQueryParams() {
+         	return 'workdir=' + encodeURIComponent(this.workdir) + '&uuid=' + encodeURIComponent(this.sessionUuid);
+         },
+         promptWorkdirName() {
+         	return window.prompt('Specify the name of the new workspace. It should not contain spaces, the slash symbol "/" or other special non-letter characters except "-" and "_".');
+         },
+         showWorkdirs(){
+         	fetch('/workdirs', {
+         		headers: {'Content-Type': 'application/json'}
+         	})
+				.then(x => x.json())
+				.then(y => this.workdirs = y);
+         },
+         addWorkdir(newwdir) {
+         	
+         	if (
+         		!newwdir.trim() ||
+         		this.workdirs.includes(newwdir) ||
+         		newwdir.includes(' ') ||
+         		newwdir.includes('/')
+         	) {
+         		this.workdirtab.alert('The new workspace name is invalid or already in use.');
+         		return;
+         	};
+         	this.openWorkdir(newwdir.trim());
+         },
+         openWorkdir(newwdir) {
+         	/*
+         	window.open(
+         		'/mainpage?workdir=' + encodeURIComponent(newwdir) + '&username=' + encodeURIComponent(this.username),
+         	 	'_blank'
+         	 );
+         	 */
+         	this.checkPopupWorked(this.workdirtab);
+         	this.workdirtab.location.href = '/mainpage?workdir=' + encodeURIComponent(newwdir) + '&username=' + encodeURIComponent(this.username);
+         	
+         },
+         manageWorkdirs() {
+         	/*
+         	window.open(
+         		'/workdirmanager?username=' + encodeURIComponent(this.username),
+         	 	'_blank'
+         	 );
+         	 */
+         	 this.checkPopupWorked(this.workdirsmgmttab);
+         	 this.workdirsmgmttab.location.href = '/workdirmanager?username=' + encodeURIComponent(this.username);
+         },
+         escapeMessageChars(s) {
+         	var escaped = s
+         	  .replaceAll('&', '&amp;')
+         	  .replaceAll('<', '&lt;')
+         	  .replaceAll('>', '&gt;')
+         	  // replace whitespace at beginning of line by equal number of &nbsp;
+         	  .replace(/^([^\S\n]+)/gm, function ($0, $1) {
+         		    return new Array($1.length + 1).join("&nbsp;");
+         	   })
+         	   .replaceAll('\n', '<br>');
+         	  return escaped;
+         },
+         	getfileoptions(suffixlist) {
+         		var opts = this.files.filter(
+         				function(fname){
+         					return suffixlist.some(suf => fname.endsWith('.' + suf))
+         				}
+         		)
+         		.sort(
+         			function(f1, f2) {
+         				return (
+         					// f1.substr(f1.lastIndexOf('.')).localeCompare(f2.substr(f2.lastIndexOf('.')))	||
+         					f1.localeCompare(f2)
+         				)
+         			}
+         		)
+         		.map(
+         				function(fname){
+         					return {label: fname.replaceAll(/(.*)\.(.+)/g, '$1.<b>$2</b>'), value: fname, disable: false};
+         				}
+         		)
+         		.concat({label: '<b>CREATE A NEW FILE</b>', value: '__CREATE__', disable: false});
+         		
+         		return opts;
+         	},
+         	forallxml() {
+         		this.update('allxml');
+         	},
+         	forallxmlXQuery() {
+         		this.update('allxmlxqdb');
+         	},
+         	showdict() {
+         		/*
+         		window.open('/dictionary?' + this.createWorkdirUuidQueryParams(), '_blank');
+         		*/
+         		this.checkPopupWorked(this.dicttab);
+         		this.dicttab.location.href = '/dictionary?' + this.createWorkdirUuidQueryParams();
+         	},
+         	setdictlemmapath() {
+         		
+         		fetch('/getpref?key=lemmaxpath&' + this.createWorkdirUuidQueryParams(), {
+	             	  headers: {'Content-Type': 'text/plain; charset=utf-8'}
+	                })
+	          		  .then(x => x.text())
+	          		  .then(lemmaxpath => {
+	          			Quasar.Dialog.create({
+	         		        title: 'Specify the lemma XPath',
+	         		        message: 'Please specify the XPath for the lemmas in your dictionary\'s XML files.',
+	         		        prompt: {
+	         		          model: lemmaxpath,
+	         		          type: 'text'
+	         		        },
+	         		        cancel: true,
+	         		        persistent: true
+	         		      }).onOk(data => {
+	         		         if (data.trim()) {
+	         	         		fetch('/setpref?key=lemmaxpath&value=' + encodeURIComponent(data.trim()) + '&' + this.createWorkdirUuidQueryParams(), {
+	         	             	  headers: {'Content-Type': 'text/plain; charset=utf-8'}
+	         	                })
+	         	          		  .then(x => x.text())
+	         	          		  .then(data => {
+	         	          			  if (data !== 'ok') {
+	         	           					  Quasar.Notify.create({
+	         	           						  message: 'An unexpected error occurred while setting the lemma XPath.',
+	         	           						  html: true,
+	         	           						  position: 'center',
+	         	           						  timeout: 5000,
+	         	           						  closeBtn: true,
+	         	           						  color: 'warning',
+	         	           						  textColor: 'black'
+	         	           					  })
+	         	          			  }
+	         	          		  })
+	    	 
+	         		         }
+	         		      }).onCancel(() => {
+	         		    	 // nothing
+	         		      })
+	          		  })
+
+         		
+         		
+         		
+         	},
+         	setdictname() {
+         		
+         		fetch('/getpref?key=dictname&' + this.createWorkdirUuidQueryParams(), {
+	             	  headers: {'Content-Type': 'text/plain; charset=utf-8'}
+	                })
+	          		  .then(x => x.text())
+	          		  .then(dictname => {
+	          			Quasar.Dialog.create({
+	         		        title: 'Give a name to your dictionary',
+	         		        message: 'Please specify a name for the dictionary of entries in the current working directory.',
+	         		        prompt: {
+	         		          model: dictname,
+	         		          type: 'text'
+	         		        },
+	         		        cancel: true,
+	         		        persistent: true
+	         		      }).onOk(data => {
+	         		         if (data.trim()) {
+	         	         		fetch('/setpref?key=dictname&value=' + encodeURIComponent(data.trim()) + '&' + this.createWorkdirUuidQueryParams(), {
+	         	             	  headers: {'Content-Type': 'text/plain; charset=utf-8'}
+	         	                })
+	         	          		  .then(x => x.text())
+	         	          		  .then(data => {
+	         	          			  if (data !== 'ok') {
+	         	           					  Quasar.Notify.create({
+	         	           						  message: 'An unexpected error occurred while setting the dictionary name.',
+	         	           						  html: true,
+	         	           						  position: 'center',
+	         	           						  timeout: 5000,
+	         	           						  closeBtn: true,
+	         	           						  color: 'warning',
+	         	           						  textColor: 'black'
+	         	           					  })
+	         	          			  }
+	         	          		  })
+	    	 
+	         		         }
+	         		      }).onCancel(() => {
+	         		    	 // nothing
+	         		      })
+	          		  })
+
+         		
+         		
+         	},
+			getHTMLEntryURL() {
+				var xmlfname = this.xmlFile ? this.xmlFile.value : '';
+				if (!xmlfname) return null;
+				
+				// was:  + '?' + this.createWorkdirUuidQueryParams()
+				return '/entry/' + encodeURIComponent(this.workdir) + 
+         				'/' + xmlfname.substr(0, xmlfname.length-4);
+			},
+         	renderhtml() {
+         		//var xmlfname = this.xmlFile.value;
+         		/*
+         		window.open(
+         			'/entry/' + encodeURIComponent(this.workdir) + 
+         				'/' + xmlfname.substr(0, xmlfname.length-4) + '?' +
+         					this.createWorkdirUuidQueryParams(),
+         			'_blank'
+         		);
+         		*/
+         		this.checkPopupWorked(this.entrytabs[this.xmlFile.value]);
+         		this.entrytabs[this.xmlFile.value].location.href = this.getHTMLEntryURL();
+         	},
+         	insertRepeatTemplate(withSeparator) {
+         		var sepText = withSeparator ? " separated by ','" : ''
+         		othereditor.getDoc().replaceSelection('<!-- repeat for all $x in /your/xpath' + sepText + ' -->');
+         		othereditor.execCommand('newlineAndIndent')
+         		othereditor.getDoc().replaceSelection('       (insert HTML instead of this text; don\'t forget to use different variables $x, $y, ... if you nest repeated sections; don\'t forget to always use the matching variable name in the "end repeat" part)');
+         		othereditor.execCommand('newlineAndIndent');
+         		othereditor.getDoc().replaceSelection('<!-- end repeat for all $x -->');
+         	},
+         	validatehtml() {
+         		/*
+         		window.open(
+         			'/validateHTML?' + this.createWorkdirUuidQueryParams(),
+         			'_blank'
+         		);
+         		*/
+         		this.checkPopupWorked(this.validatetab);
+         		this.validatetab.location.href = '/validateHTML?' + this.createWorkdirUuidQueryParams();
+         		
+         	},
+         	xmlEditorDisabled() {
+         		if (!xmleditor) {return true}
+         		return xmleditor.state.suppressEdits;
+         	},
+         	otherEditorDisabled() {
+         		if (!othereditor) {return true}
+         		return othereditor.state.suppressEdits;
+         	},
+             update(mode) {
+         	  // Throttling https://gomakethings.com/debouncing-vs.-throttling-with-vanilla-js/
+         	  // basic ideas: (a) while server response is not there, all further updates are blocked;
+         	  //   (b) during blocking no actions can be invoked (GUI components disabled)
+         	  if (this.throttleWait) {
+         		  console.log('throttling...');
+         		  return;
+         	   }
+         	  this.throttleWait = true;
+         	  if (mode === 'fetch xml' && this.xmlFile && this.xmlFile.value == '__CREATE__') {
+         		  this.xmlFile = null;
+                disableEditor(xmleditor);
+                xmleditor.getDoc().clearHistory();
+                this.xmlMsg = '';
+                Quasar.Dialog.create({
+         		        title: 'Create new XML file',
+         		        message: 'Please specify a name for the new XML file. The name MUST end in ".xml".',
+         		        prompt: {
+         		          model: '',
+         		          type: 'text'
+         		        },
+         		        cancel: true
+         		      }).onOk(data => {
+         		         if (data.endsWith('.xml') && data.trim().length > 4) {
+         		        	this.throttleWait = false;
+         		        	 var createdXmlFileName = data.trim();
+         		        	 this.update('create ' + createdXmlFileName);
+         		        	 //this.xmlFile = {value: data.trim(), label: 'pending...'};
+         		         } else {
+         		        	Quasar.Notify.create({
+         		          	  message: 'The file name must end in ".xml". Please try again.',
+         		          	  html: true,
+         		          	  position: 'center',
+         		          	  timeout: 5000,
+         		          	  closeBtn: true,
+         		          	  color: 'warning',
+         		          	  textColor: 'black'
+         		            });
+         		        	 this.throttleWait = false;
+         		        	 this.update('update')
+         		         }
+         		      }).onCancel(() => {
+         		    	 this.throttleWait = false; this.update('update');
+         		      })
+         	  } else if (mode === 'fetch other' && this.otherFile && this.otherFile.value == '__CREATE__') {
+         		  this.otherFile = null;
+                  disableEditor(othereditor);
+                  othereditor.getDoc().clearHistory();
+                  this.otherMsg = '';
+                  Quasar.Dialog.create({
+           		        title: 'Create new DTD/RelaxNG/XPath/HTML file',
+           		        message: 'Please specify a name for the new file. The name MUST end in ".dtd", ".rnc", ".xpath", or ".html".',
+           		        prompt: {
+           		          model: '',
+           		          type: 'text'
+           		        },
+           		        cancel: true
+           		      }).onOk(data => {
+           		         if (['dtd', 'xpath', 'html', 'rnc', 'rng'].some(suf => data.endsWith('.' + suf) && data.trim().length > (suf.length + 1))) {
+           		        	 this.throttleWait = false;
+           		        	 var createdOtherFileName = data.trim();
+           		        	 this.update('create ' + createdOtherFileName);
+           		         } else {
+           		        	Quasar.Notify.create({
+           		          	  message: 'The file name must end in ".dtd", ".rnc", ".xpath", or ".html". Please try again.',
+           		          	  html: true,
+           		          	  position: 'center',
+           		          	  timeout: 5000,
+           		          	  closeBtn: true,
+           		          	  color: 'warning',
+           		          	  textColor: 'black'
+           		            });
+           		        	 this.throttleWait = false;
+           		        	 this.update('update');
+           		         }
+           		      }).onCancel(() => {
+           		    	this.throttleWait = false; this.update('update');
+           		      })
+           	  } else {
+           		  // all other update modes
+         	      fetch('/update', {
+         	    	  method: 'POST',
+         	    	  headers: {'Content-Type': 'application/json'},
+         	    	  body: JSON.stringify({
+         	    		  command: mode,
+         	    		  xmlFile: this.xmlFile ? this.xmlFile.value : '',
+         	    		  xmlContent: this.xmlEditorDisabled() ? '' : xmleditor.getValue(),
+         	    		  otherFile: this.otherFile ? this.otherFile.value : '',
+                	      otherContent: this.otherEditorDisabled() ? '' : othereditor.getValue(),
+                	      workdir: this.workdir,
+                	      uuid: this.sessionUuid
+         	    		  
+         	    	  }) 
+         	       })
+          			  .then(x => x.json())
+          			  .then(data => {
+          				  this.throttleWait = false;
+          				  if (data.error) {
+          					  Quasar.Notify.create({
+          						  message: data.error,
+          						  html: true,
+          						  position: 'center',
+          						  timeout: 20000,
+          						  closeBtn: true,
+          						  color: 'warning',
+          						  textColor: 'black'
+          					  });
+          					  return;
+          				  }
+          				  this.files = data.files;
+          				  if ((mode === 'fetch xml' || mode === 'prettifyxml') && this.xmlFile) {
+                					xmleditor.state.suppressEdits = false;
+                  					xmleditor.preventEditorUpdateCall = true;
+                  					xmleditor.setValue(data.xmlContent);
+                  					this.xmlMsg = data.xmlMsg;  
+                  					this.otherMsg = data.otherMsg;
+                  					if (mode !== 'prettifyxml') xmleditor.getDoc().clearHistory();
+          				  }
+          				  if ((mode === 'fetch other' || mode === 'prettifyhtml') && this.otherFile) {
+                					othereditor.state.suppressEdits = false;
+                					othereditor.preventEditorUpdateCall = true;
+                  					othereditor.setValue(data.otherContent);
+                  					this.otherMsg = data.otherMsg;
+                  					if (mode !== 'prettifyhtml') {
+                  						othereditor.getDoc().clearHistory();
+                  						if (this.otherFile.value.endsWith('.dtd')) {
+                  							othereditor.setOption('mode', 'dtd');
+                  							othereditor.setOption('gutters', []);
+                  							othereditor.setOption('lint', false);
+                  						} else if (this.otherFile.value.endsWith('.rng')) {
+                  							othereditor.setOption('mode', 'xml');
+                  							othereditor.setOption('gutters', []);
+                  							othereditor.setOption('lint', false);                  							
+                  						} else if (this.otherFile.value.endsWith('.rnc')) {
+                  							othereditor.setOption('mode', null);
+                  							othereditor.setOption('gutters', []);
+                  							othereditor.setOption('lint', false);                  							
+                  						} else if (this.otherFile.value.endsWith('.xpath')) {
+                  							othereditor.setOption('mode', 'xquery');
+                  							othereditor.setOption('gutters', []);
+                  							othereditor.setOption('lint', false);                  							
+                  						} else if (this.otherFile.value.endsWith('.html')) {
+                  							othereditor.setOption('mode', 'htmlmixed');
+                  							othereditor.setOption('gutters', ["CodeMirror-lint-markers"]);
+                  							othereditor.setOption('lint', true);      
+                  							othereditor.setOption('extraKeys', {"Ctrl-Space": "autocomplete"});
+                  							
+                  						}
+                  						if (this.xmlFile) {
+											if (this.hasHTML) {
+          										for (let et of Object.values(this.entrytabs)) {
+          											if (et && et.location && et.location.reload) et.location.reload();
+          										}   
+												if (!this.showHTMLSource) document.getElementById('htmliframe').contentWindow.location.reload();               						
+                  							}
+          								}
+                  						
+                  						
+                  					}
+                  					
+          				  }
+          				  if (mode.startsWith('create')) {
+          					var createdFileName = mode.substr(6).trim();
+          					if (createdFileName.endsWith('.xml')) {
+              					xmleditor.state.suppressEdits = false;
+              					xmleditor.preventEditorUpdateCall = true;
+              					xmleditor.setValue(data.xmlContent);
+              					this.xmlFile = {label: createdFileName, value: createdFileName};
+              					this.xmlMsg = data.xmlMsg; 
+              					this.otherMsg = data.otherMsg;
+              					xmleditor.getDoc().clearHistory();
+          					} else {
+              					othereditor.state.suppressEdits = false;
+              					othereditor.preventEditorUpdateCall = true;
+              					othereditor.setValue(data.otherContent);
+              					this.otherFile = {label: createdFileName, value: createdFileName};
+              					this.otherMsg = data.otherMsg; 
+              					othereditor.getDoc().clearHistory();
+          					}
+          				  }
+          				  if (mode==='update') {
+          					this.xmlMsg = data.xmlMsg;
+          					this.otherMsg = data.otherMsg;
+          					if (this.hasHTML) {
+          						// refresh all HTML renderings...
+          						for (let et of Object.values(this.entrytabs)) {
+          							if (et && et.location && et.location.reload) et.location.reload();
+          						}
+								if (!this.showHTMLSource) document.getElementById('htmliframe').contentWindow.location.reload(); 
+          					}
+          				  }
+          				  if (mode==='allxml' || mode==='allxmlxqdb') {
+          					this.otherMsg = data.otherMsg;
+          				  }
+          				  
+          			  })
+          			  .catch(error => {
+          				this.throttleWait = false;
+          				Quasar.Notify.create({
+         	  message: 'An unexpected problem has occurred: ' + error  + '.<br>Please check whether the Java x4ml application (Launcher) is still running.<br>In case you restarted the Java application,<br>you need to open a new x4ml browser window.<br><br>If you did not stop or restart Launcher,\nthen this might be a genuine error (bug) in the program.',
+         	  html: true,
+         	  position: 'center',
+         	  timeout: 20000,
+         	  closeBtn: true,
+         	  color: 'warning',
+         	  textColor: 'black'
+           })    					 
+          })
+         	  }
+               
+             }
+           },
+           computed: {
+        	   xmlEditor() {return xmleditor},
+        	   otherEditor() {return othereditor},
+        	   hasHTML() {return this.otherFile && this.otherFile.value.endsWith('.html')},
+        	   hasXML() {return !!this.xmlFile},
+        	   hasXPath() {return this.otherFile && this.otherFile.value.endsWith('.xpath')}
+           },
+           created() {
+         	  //this.update = Quasar.debounce(this.update, 500);
+           },
+           mounted: function() {
+           	  let params = (new URL(document.location)).searchParams;
+			  let workdirParam = params.get("workdir");
+			  this.workdir = workdirParam;
+			  let usernameParam = params.get("username");
+			  //this.username = usernameParam;
+			  // create unique session id for this user and workdir
+			  this.sessionUuid = Quasar.uid();
+         	  fetch('/init', {
+         	  	method: 'POST',
+         	  	headers: {'Content-Type': 'application/json'},
+         	  	body: JSON.stringify({
+         	  		workdir: workdirParam,
+                	uuid: this.sessionUuid
+         	  	})
+         	  })
+         	  .then(x => x.json())
+         	  .then(data => {
+         		  this.projectdir = data.projectdir;
+         		  this.files = data.files;
+         		  this.username = data.username;
+         	  })
+         	  
+           }
+         
+         })
+         
+         app.use(Quasar);
+         const vm = app.mount('#q-app');
+         
+         function disableEditor(editor) {
+          editor.preventEditorUpdateCall = true;
+          editor.setValue('Please select or create a file using the dropdown above to get started.'
+        		  + ((editor === othereditor) ? '\n\nPLEASE NOTE: Most of the functionality in this right pane is available only if an XML file is open in the left pane.' : ''));
+          editor.state.suppressEdits = true;
+         }
+         
+         
+         
+         var xmleditor = CodeMirror.fromTextArea(document.getElementById("xmlfilecontent"), {
+         	mode: "xml",
+         	matchTags: true,
+         	autoCloseTags: true,
+         	lineNumbers: true,
+         	lineWrapping: true,
+         	//extraKeys: {"Ctrl-Space": "autocomplete"}
+         });
+         
+         var othereditor = CodeMirror.fromTextArea(document.getElementById("otherfilecontent"), {
+             lineNumbers: true,
+             lineWrapping: true,
+             matchTags: true,
+          	 autoCloseTags: true
+         });
+         
+         xmleditor.setSize("100%", "90%");
+         othereditor.setSize("100%", "90%");
+         
+         xmleditor.preventEditorUpdateCall = false;
+         
+         disableEditor(xmleditor);
+         xmleditor.on("change", function(cm, change) {
+          if (xmleditor.preventEditorUpdateCall) {
+            xmleditor.preventEditorUpdateCall = false;
+          } else {
+            vm.update('update');	  
+          }
+          
+         });
+         
+         othereditor.preventEditorUpdateCall = false;
+         
+         disableEditor(othereditor);
+         othereditor.on("change", function(cm, change) {
+          if (othereditor.preventEditorUpdateCall) {
+        	  othereditor.preventEditorUpdateCall = false;
+          } else {
+           vm.update('update');	  
+          }
+          
+         });         
+         
+      </script>
+   </body>
+</html>
