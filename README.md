@@ -1,11 +1,10 @@
-<img src="https://github.com/PeterMeyerIDS/x4ml/assets/4037815/cdde5028-82ab-492d-b75b-ea169aaeadb9" width="300">
+<img src="docs/x4ml-logo.jpg" width="300">
 
 # x4ml: A Teaching Tool for XML-based lexicographical data modeling and (HTML) presentation
 
-
 **x4ml** is "**X**ML **4 M**asterful **L**exicographers". This is the first public release, 0.9.**70**, of x4ml, in honor of Professor **Gerd Hentschel** on the occasion of his 70th birthday on July 15, 2023.
 
-<img src="https://github.com/PeterMeyerIDS/x4ml/assets/4037815/63a01c1f-ca79-4639-9f29-f73d19913f9d" width="500">
+<img src="docs/GH.jpg" width="500">
 
 This release accompanies the Festschrift publication
 > Peter Meyer (2023): 'Einsatz von EDV und Mikrocomputer in Lehrveranstaltungen zur digitalen Lexikografie'. In: Hauke Bartels, Thomas Menzel, Jan Patrick Zeller (eds.): *Einheit(en) in der Vielfalt von Slavistik und Osteuropakunde. Prvdentia Regnorvm Fvndamentvm.* Lausanne-Berlin-Bruxelles-Chennai-New York-Oxford: Peter Lang.
@@ -44,7 +43,7 @@ java -jar x4ml.jar 1234 /path/to/base/directory your-admin-user-name your-admin-
 The base directory contains the workspaces of all users. The web application is available at `http://127.0.0.1:1234` and presents users with a login screen. If you log in with your-admin-user-name and your-admin-password, you can create other users on the page `http://127.0.0.1:1234/users`. Just follow the instructions.
 
 ## Understanding the Launcher app in Desktop mode
-<img width="500" src="https://github.com/PeterMeyerIDS/x4ml/assets/4037815/fc4255d6-b435-4406-8555-d02d86c09b21">
+<img width="500" src="docs/launcher.jpg">
 
 Here are some basic ideas of how to work with the Launcher and the x4ml application:
 - x4ml needs the Launcher to run. If you close the Launcher, your x4ml browser windows won’t react any more. (But no data is lost.)
@@ -56,7 +55,7 @@ Here are some basic ideas of how to work with the Launcher and the x4ml applicat
 - If there are folders inside the directory belonging to a workspace, they are ignored (with the exception of the resources subdirectory that only becomes relevant when we come to HTML). In other words, you cannot open or create files in subfolders of your workspace directory.
 
 ## Basic principles of working with the x4ml browser user interface
-![gui](https://github.com/PeterMeyerIDS/x4ml/assets/4037815/8e5a4274-c179-4539-b3a3-e1c7ed345ce7)
+<img src="docs/gui.jpg">
 
 - The x4ml application window in the browser consists of two panes, left and right. **The left pane is for working with XML files. The right pane is for working with all other kinds of files that can “do something with” the currently opened XML file on the left** (such as describe/validate its structure or extract certain information from it). 
 - Each pane has an upper and a lower half. The upper half is an editor that you use to inspect and change the content of a file you opened. The lower half just displays messages or some output that relates to your file.
@@ -72,7 +71,7 @@ Your work with x4ml is organized in *workspaces*.
 - A workspace is just a folder/directory – actually simply a subfolder inside the base directory – that contains files that “belong together”. Think of a workspace as an individual project of yours: You may want to just play around with some files – so you put them in the pre-defined default workspace ‘playground’. You may want to keep the files for a do-it-yourself-dictionary as a separate project – so you use another workspace you could simply call ‘my-nano-dictionary’. Different workspaces do not interfere with each other.
 - You can have any number of workspaces open in parallel, in different tabs.
 - In order to create, delete, manage workspaces, just click on the *current workspace* information in the upper right corner. The different options are, hopefully, self-explanatory. The *manage workspaces* menu item leads you to a rudimentary **workspace manager**, which basically allows you to add and delete files in your workspaces – something that you can also do manually in your computer’s file explorer (Windows Explorer, Apple Finder, Linux Konqueror, …) if you are in desktop mode. Clicking on a file name usually gives you a preview of its contents. Each workspace has a special *resources* folder that you can use for HTML stuff (see below). Using the green “+” button, you can add new files to this folder.
-![wm](https://github.com/PeterMeyerIDS/x4ml/assets/4037815/6fb90224-15f4-4222-af6e-cb3291176a86)
+<img width="500" src="docs/wm.jpg">
 
 - You may create any number of new files in the current workspace by clicking on the “select or create …” dropdowns at the top of the page and then selecting the CREATE NEW FILE entry at the very end of the dropdown menu.
 - All files that you create with x4ml can of course also be edited with any other program. But I do not recommend that – at least you should definitely not do it while you’re working with x4ml on the exact same file.
@@ -135,8 +134,11 @@ This will produce
 ```
 if your XML contains the elements `<definition>some definition</definition>` and `<definition>other definition</definition>`.
 - Per default, x4ml uses your HTML file with the XML file currently open in the left pane and shows you the results of that in the lower half. If you want to do this for all of your XML files in your workspace at once such that the HTML template is applied to each XML file separately, just use the action *show output for all XML files*. Note that this is not a permanent setting – as soon as you change something in either the XPath file or the current HTML file, you get the results for the current HTML only again. – This action is probably less interesting than the dictionary action discussed below.
-- You can use an HTML file with moustaches etc. to build your own mini-dictionary, where the HTML is applied to all the XML files in your workspace. Just invoke the *show as dictionary* action. In order to get a custom heading of your online dictionary, try the *set name of dictionary* action. x4ml memorizes the dictionary name for your workspace. Per default, the headword list on the left of your dictionary is filled with the names of your XML files (excluding the .xml suffix part). You can tell x4ml how to find the headword in your XMLs with the action *set XPath for dictionary headwords*. 
-- If you want to include external files, e.g. multimedia stuff, into your HTML, that is possible. If you have an image called *funny.jpg* and you want to include it, create a folder named resources (no other name allowed!) directly inside your workspace folder and put the image there. You can do this using the workspace manager (which automatically creates the resources folder) – or manually using your computer’s file explorer if you are using x4ml in Desktop mode. Now you can use, for example, `<img src="resources/funny.jpg">` in your HTML file to include the image there.
+- You can use an HTML file with moustaches etc. to build your own mini-dictionary, where the HTML is applied to all the XML files in your workspace. Just invoke the *show as dictionary* action. In order to get a custom heading of your online dictionary, try the *set name of dictionary* action. x4ml memorizes the dictionary name for your workspace. Per default, the headword list on the left of your dictionary is filled with the names of your XML files (excluding the .xml suffix part). You can tell x4ml how to find the headword in your XMLs with the action *set XPath for dictionary headwords*.
+
+<img src="dict/GH.jpg" width="500">
+
+- If you want to include external files, e.g. multimedia stuff, into your HTML, that is possible. If you have an image called *funny.jpg* and you want to include it, create a folder named resources (no other name allowed!) directly inside your workspace folder and put the image there. You can do this using the workspace manager (which automatically creates the resources folder) – or manually using your computer’s file explorer if you are using x4ml in Desktop mode. Now you can use, for example, ```<img src="resources/funny.jpg">``` in your HTML file to include the image there.
 
 ## Roadmap
 There's still a lot to do:
