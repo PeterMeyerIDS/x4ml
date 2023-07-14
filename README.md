@@ -1,5 +1,7 @@
-# x4ml: A Teaching Tool for XML-based lexicographical data modeling and (HTML) presentation
 <img src="https://github.com/PeterMeyerIDS/x4ml/assets/4037815/cdde5028-82ab-492d-b75b-ea169aaeadb9" width="300">
+
+# x4ml: A Teaching Tool for XML-based lexicographical data modeling and (HTML) presentation
+
 
 **x4ml** is "**X**ML **4 M**asterful **L**exicographers". This is the first public release, 0.9.**70**, of x4ml, in honor of Professor **Gerd Hentschel** on the occasion of his 70th birthday on July 15, 2023.
 
