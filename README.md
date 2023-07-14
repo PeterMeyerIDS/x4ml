@@ -71,7 +71,7 @@ Your work with x4ml is organized in *workspaces*.
 - A workspace is just a folder/directory – actually simply a subfolder inside the base directory – that contains files that “belong together”. Think of a workspace as an individual project of yours: You may want to just play around with some files – so you put them in the pre-defined default workspace ‘playground’. You may want to keep the files for a do-it-yourself-dictionary as a separate project – so you use another workspace you could simply call ‘my-nano-dictionary’. Different workspaces do not interfere with each other.
 - You can have any number of workspaces open in parallel, in different tabs.
 - In order to create, delete, manage workspaces, just click on the *current workspace* information in the upper right corner. The different options are, hopefully, self-explanatory. The *manage workspaces* menu item leads you to a rudimentary **workspace manager**, which basically allows you to add and delete files in your workspaces – something that you can also do manually in your computer’s file explorer (Windows Explorer, Apple Finder, Linux Konqueror, …) if you are in desktop mode. Clicking on a file name usually gives you a preview of its contents. Each workspace has a special *resources* folder that you can use for HTML stuff (see below). Using the green “+” button, you can add new files to this folder.
-<img width="500" src="docs/wm.jpg">
+<img src="docs/wm.jpg">
 
 - You may create any number of new files in the current workspace by clicking on the “select or create …” dropdowns at the top of the page and then selecting the CREATE NEW FILE entry at the very end of the dropdown menu.
 - All files that you create with x4ml can of course also be edited with any other program. But I do not recommend that – at least you should definitely not do it while you’re working with x4ml on the exact same file.
@@ -148,3 +148,4 @@ There's still a lot to do:
 - namespace support in XQuery and HTML templates
 - integrated HTML validation support (instead of invoking the Nu Html Checker on [validator.w3.org](https://validator.w3.org/))
 - option to rename files in workspace manager
+- ...
