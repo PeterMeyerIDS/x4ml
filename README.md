@@ -26,20 +26,20 @@ Special features of x4ml:
 
 ## Installing and starting x4ml
 x4ml requires a Java Runtime Environment (JRE), version 11 or higher. It has been tested with the free and open-source OpenJDK distributions Eclipse Temurin and Azul Zulu but should work with any Java distribution.
-### desktop mode (local single-user installation) 
+### Desktop mode (local single-user installation) 
 Just grab the latest binary, save it to a folder where you have read/write access, and double-click. On the command line, enter
 ```
 java -jar /path/to/x4ml.jar
 ```
 The main application window (called the *Launcher*) should appear. You must select a *base directory* where all your workspaces will be created. The Launcher's main purpose is to launch the browser-based user interface.
-### server mode (remote installation for multi-user mode of operation)
-Server mode is fully operational but still rather rudimentary for the time being. It has not been tested in the wild, so your mileage may vary. There's no user data encryption, users cannot change their password... On the server, invoke
+### Server mode (remote installation for multi-user mode of operation)
+Server mode is an experimantal feature and rather rudimentary for the time being. It has not been tested in the wild, so your mileage may vary. There's no user data encryption, users cannot change their password... On the server, invoke
 ```
 java -jar x4ml.jar 1234 /path/to/base/directory your-admin-user-name your-admin-password
 ```
 The base directory contains the workspaces of all users. The web application is available at `http://127.0.0.1:1234` and presents users with a login screen. If you log in with your-admin-user-name and your-admin-password, you can create other users on the page `http://127.0.0.1:1234/users`. Just follow the instructions.
 
-## Understanding the Launcher app in desktop mode
+## Understanding the Launcher app in Desktop mode
 Here are some basic ideas of how to work with the Launcher and the x4ml application:
 - x4ml needs the Launcher to run. If you close the Launcher, your x4ml browser windows won’t react any more. (But no data is lost.)
 - The Launcher memorizes the selected base directory, so you won’t have to select it again each time you start the program. But you can change it any time.
@@ -53,9 +53,8 @@ Here are some basic ideas of how to work with the Launcher and the x4ml applicat
 Your work with x4ml is organized in workspaces.
 - A workspace is just a folder/directory – actually simply a subfolder inside the base directory – that contains files that “belong together”. Think of a workspace as an individual project of yours: You may want to just play around with some files – so you put them in the pre-defined default workspace ‘playground’. You may want to keep the files for a do-it-yourself-dictionary as a separate project – so you use another workspace you could simply call ‘my-nano-dictionary’. Different workspaces do not interfere with each other.
 - You can have any number of workspaces open in parallel, in different tabs.
-- In order to create, delete, manage workspaces, just click on the *current workspace* info in the upper right corner. The different options are, hopefully, self-explanatory. The *manage workspaces* menu item leads you to a rudimentary **workspace manager**, which basically allows you to delete files in your workspaces – something that you can do manually in your computer’s file explorer as well if you are in desktop mode. Clicking on a file name usually gives you a preview of its contents. Each workspace has a special resources folder that you can use for HTML stuff (see below). Using the green “+” button, you can put files in this folder. In desktop mode you can also simply put a file into a workspace folder manually.
-- You may create any number of new files in the current workspace by clicking on the “select or create …” dropdowns at the top of the page and then selecting the CREATE NEW FILE entry at the end of the dropdown menu.
-- If you want to delete a file in your workspace, you can either do that in x4ml’s workspace manager or (in desktop mode) use the file system program of your operating system (Windows Explorer, Apple Finder, Linux Konqueror, …) to do that.
+- In order to create, delete, manage workspaces, just click on the *current workspace* information in the upper right corner. The different options are, hopefully, self-explanatory. The *manage workspaces* menu item leads you to a rudimentary **workspace manager**, which basically allows you to add and delete files in your workspaces – something that you can do manually in your computer’s file explorer (Windows Explorer, Apple Finder, Linux Konqueror, …) as well if you are in desktop mode. Clicking on a file name usually gives you a preview of its contents. Each workspace has a special *resources* folder that you can use for HTML stuff (see below). Using the green “+” button, you can add new files to any folder.
+- You may create any number of new files in the current workspace by clicking on the “select or create …” dropdowns at the top of the page and then selecting the CREATE NEW FILE entry at the very end of the dropdown menu.
 - All files that you create with x4ml can of course also be edited with any other program. But I do not recommend that – at least you should definitely not do it while you’re working with x4ml on the exact same file.
 
 ## Basic principles of working with the x4ml browser user interface
@@ -63,32 +62,32 @@ Your work with x4ml is organized in workspaces.
 - Each pane has an upper and a lower half. The upper half is an editor that you use to inspect and change the content of a file you opened. The lower half just displays messages or some output that relates to your file.
 - The editor panes understand standard keyboard shortcuts, mostly do syntax highlighting, and, depending on the file type, the editors have some additional features, e.g., showing you errors, automatically completing your code etc.
 - You can drag the blue round knobs to change the size of the two panes and their upper and lower halves.
-- When there is an open file in a pane, you may click on the “action” button in that same pane to perform certain operations on the file. We will learn about the possible actions for different types of files as we go along.
+- When there is an open file in a pane, you may click on the “action” button in that same pane to perform certain operations on the file. For more on the possible actions for different types of files, see below.
 - Whenever you change something in a file opened through x4ml, your changes are saved immediately; all panes are updated immediately.
-- Watch out for blocked popups! Some workspace operations open a new tab or window in the browser. Some browsers (notably Chrome) block this, but issue a warning. You should then allow “popups” for x4ml and retry. I have not been able to solve this problem satisfactorily until now. x4ml checks for suppressed popups, however, and issues warnings where necessary.
+- Watch out for blocked popups! Some workspace operations open a new tab or window in the browser. Sometimes browsers block this, but issue a warning. You should then allow “popups” for x4ml and retry. I have not been able to solve this problem satisfactorily until now. x4ml checks for suppressed popups, however, and issues warnings where necessary.
 
 ## Editing XML files (left pane, file name ends in ‘.xml’)
 - If you type a start tag, the editor puts in the end tag as soon as you typed the closing bracket >.
 - If you hit ENTER to start a new line, the indentation of the previous line is preserved. This is not always what you want, but most of the time it is convenient.
-- XML files are easier to read when indentation is used to clearly show the structure. The action format XML can be used to automatically create a well-readable indentation. It’s not always perfect; if you do not like the outcome, just use the undo action (or the undo shortcut Ctrl/Command-z).
+- XML files are easier to read when indentation is used to clearly show the structure. The action *format XML* can be used to automatically create a well-readable indentation. It’s not always perfect; if you do not like the outcome, just use the undo action (or the undo shortcut Ctrl/Command-z).
 
 ## Editing DTD files (right pane, file name ends in ‘.dtd’)
 - Per default, x4ml uses the DTD file to validate (=check the structure of) the XML file currently open in the left pane and shows you the results in the lower half. If you want to validate all your XML files in your workspace at once, just use the action *show output for all XML files*. Note that this is not a permanent setting – as soon as you change something in either the DTD or the current XML file, you again get the validation results for the current XML only.
-- Other than that, nothing special, just syntax highlighting.
+- Other than that, there are no special editor features, just syntax highlighting.
 
-## RelaxNG files, compact notation (right pane, file name ends in ‘.rnc’)
+## Editing RelaxNG files, compact notation (right pane, file name ends in ‘.rnc’)
 - Per default, x4ml uses the RelaxNG file to validate (=check the structure of) the XML file currently open in the left pane and shows you the results in the lower half. If you want to validate all your XML files in your workspace at once, just use the action *show output for all XML files*. Note that this is not a permanent setting – as soon as you change something in either the RelaxNG or the current XML file, you again get the validation results for the current XML only.
-- Other than that, nothing special – alas, no syntax highlighting in the RelaxNG code.
+- Other than that, there are no special editor features – alas, not even syntax highlighting in the RelaxNG code.
 - Inofficially, also the XML notation of RelaxNG is supported (file name ends in ‘.rng’).
 
-## XPath/XQuery files (right pane, file name ends in ‘.xpath’)
-- You can only type one XPath expression per file (but this might consist of several expressions separated by commas, which returns a sequence of results). The editor shows you the result of applying this expression to the XML on the left side. Your XPath expression is a question about the XML on the left hand side, and you’re shown the answer.
+## Editing XPath/XQuery files (right pane, file name ends in ‘.xpath’)
+- You can only type one XPath expression per file (but this might consist of several expressions separated by commas, which simply returns a sequence of results). The editor shows you the result of applying this expression to the XML on the left side. Your XPath expression is a question about the XML on the left hand side, and you’re shown the answer.
 - If you like, you can use a comment, which looks (: like this :) in XPath, as a “storage” for, well, comments and other stuff, e.g. any number of XPath expressions you tried or want to try. You may put comments before or after your XPath expression.
 - Per default, x4ml applies the XPath to the XML file currently open in the left pane and shows you the results in the lower half. If you want to do this for all of your XML files in your workspace at once such that the XPath expression is applied to each XML file in turn, just use the action *show output for all XML files*. Note that this is not a permanent setting – as soon as you change something in either the XPath file or the current XML file, you get the results for the current XML only again.
 - You can apply your XPath expression to all your XML documents, not individually but taken together, using the action *evaluate XPath query on all XML docs* ("database mode"). Technically, this means that the query / returns a sequence such that for each XML document in the workspace, all children of the root node form one item in the sequence.
 - In your XPath files, you may actually use not only XPath expressions, but also any expressions in XQuery (version 3.1), of which the XPath language is a subset.
 
-## HTML files (right pane, file name ends in ‘.html’)
+## Editing HTML files (right pane, file name ends in ‘.html’)
 - The HTML editor has automatic end tag completion, like the XML editor; and it gives visual feedback if your HTML is not well-formed, i.e. if you made a syntax mistake.
 - The output in the lower half of the right pane is the HTML as rendered in a browser.
 - You can include XPath expressions into your HTML code. The expressions must be enclosed in double curly brackets (‘moustaches’), like this: {{/entry/headword}}. The trick is that x4ml executes that expression with respect to the XML file on the left and puts the result where the moustaches are. This way, your HTML document becomes a **template** that is filled with content from your XML file. (This is similar to an important technology called XSLT, but hopefully easier.)
@@ -128,3 +127,11 @@ if your XML contains the elements `<definition>some definition</definition>` and
 - You can use an HTML file with moustaches etc. to build your own mini-dictionary, where the HTML is applied to all the XML files in your workspace. Just invoke the *show as dictionary* action. In order to get a custom heading of your online dictionary, try the *set name of dictionary* action. x4ml memorizes the dictionary name for your workspace. Per default, the headword list on the left of your dictionary is filled with the names of your XML files (excluding the .xml suffix part). You can tell x4ml how to find the headword in your XMLs with the action *set XPath for dictionary headwords*. 
 - If you want to include external files, e.g. multimedia stuff, into your HTML, that is possible. If you have an image called *funny.jpg* and you want to include it, create a folder named resources (no other name allowed!) directly inside your workspace folder and put the image there. You can do this using the workspace manager (which automatically creates the resources folder) – or manually using your computer’s file explorer if you are using x4ml in Desktop mode. Now you can use, for example, `<img src="resources/funny.jpg">` in your HTML file to include the image there.
 
+## Roadmap
+There's still a lot to do:
+- server mode: more testing, better user data protection, better user management
+- XSLT support
+- XML on the right hand side (for easy comparison of two XML files)
+- namespace support in XQuery and HTML templates
+- integrated HTML validation support (instead of invoking the Nu Html Checker on [validator.w3.org](https://validator.w3.org/))
+- option to rename files in workspace manager
